@@ -28,10 +28,10 @@ return new class {
     private static $tokenizer;
     private static $evaluator;
 
-    public function parser(array $variables): Parser\Parser
+    public function parser(array $variables, callable $variableCallback = null): Parser\Parser
     {
         return new Parser\Parser(
-            self::ast($variables),
+            self::ast($variables, $variableCallback),
             self::expressionFactory(),
             self::compiler()
         );
@@ -64,10 +64,11 @@ return new class {
         return self::$compiler;
     }
 
-    private static function ast(array $variables): AST
+    private static function ast(array $variables, callable $variableCallback = null): AST
     {
         $ast = new AST(self::tokenizer(), self::tokenFactory(), self::tokenStreamFactory());
         $ast->setVariables($variables);
+        $ast->registerVariableCallback($variableCallback);
 
         return $ast;
     }

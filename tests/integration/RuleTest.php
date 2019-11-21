@@ -29,13 +29,41 @@ class RuleTest extends \PHPUnit\Framework\TestCase
 
         $vars = [
             'foo' => 5,
-            'bar' => 7
+            'bar' => 7,
         ];
 
         $rule = new Rule\Rule($string, $vars);
 
         $this->assertTrue($rule->isTrue());
         $this->assertTrue(!$rule->isFalse());
+    }
+
+    public function testVariableCallback()
+    {
+        $string = 'foo.bar === 10 && bar.foo === 5 && foo.bar > bar.foo2 && a === 10';
+        $map = [
+            'foo.bar' => 10,
+            'bar.foo' => 5,
+            'bar.foo2' => 1,
+            'a' => 10,
+        ];
+        $rule = new Rule\Rule($string, [], function (string $name) use ($map) {
+            return $map[$name];
+        });
+        $this->assertTrue($rule->isTrue());
+    }
+
+    public function testStringVariableCallback()
+    {
+        $string = 'foo.bar === "a@b.c" && bar.foo === \'https://ab.c\' ';
+        $map = [
+            'foo.bar' => 'a@b.c',
+            'bar.foo' => 'https://ab.c',
+        ];
+        $rule = new Rule\Rule($string, [], function (string $name) use ($map) {
+            return $map[$name];
+        });
+        $this->assertTrue($rule->isTrue());
     }
 
     public function testIsValidReturnsFalseOnInvalidSyntax()
